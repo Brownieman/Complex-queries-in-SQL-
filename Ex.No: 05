@@ -1,0 +1,117 @@
+-- Create a database and table for storing results
+CREATE DATABASE exampledb;
+USE exampledb;
+
+CREATE TABLE results (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    description VARCHAR(255),
+    value FLOAT
+);
+
+DELIMITER //
+
+-- 1) Convert Celsius to Fahrenheit
+CREATE PROCEDURE convert_celsius_to_fahrenheit(IN celsius FLOAT)
+BEGIN
+    INSERT INTO results (description, value) VALUES ('Fahrenheit', (celsius * 9/5) + 32);
+END //
+
+-- 2) Swap Values
+CREATE PROCEDURE swap_values(INOUT a INT, INOUT b INT)
+BEGIN
+    SET a = a + b, b = a - b, a = a - b;
+END //
+
+-- 3) Greatest Among Three Numbers
+CREATE PROCEDURE greatest_of_three(IN a INT, IN b INT, IN c INT)
+BEGIN
+    INSERT INTO results (description, value) VALUES ('Greatest', GREATEST(a, b, c));
+END //
+
+-- 4) Factorial of a Given Number
+CREATE PROCEDURE factorial(IN n INT)
+BEGIN
+    SET @fact = 1;
+    WHILE n > 0 DO
+        SET @fact = @fact * n, n = n - 1;
+    END WHILE;
+    INSERT INTO results (description, value) VALUES ('Factorial', @fact);
+END //
+
+-- 5) Generate N Even Numbers
+CREATE PROCEDURE generate_even_numbers(IN n INT)
+BEGIN
+    SET @i = 0;
+    WHILE @i < n DO
+        INSERT INTO results (description, value) VALUES ('Even Number', @i * 2);
+        SET @i = @i + 1;
+    END WHILE;
+END //
+
+-- 6) Fibonacci Series
+CREATE PROCEDURE fibonacci_series(IN n INT)
+BEGIN
+    SET @a = 0, @b = 1, @i = 0;
+    WHILE @i < n DO
+        INSERT INTO results (description, value) VALUES ('Fibonacci Number', @a);
+        SET @next = @a + @b, @a = @b, @b = @next, @i = @i + 1;
+    END WHILE;
+END //
+
+-- 7) Armstrong Number Check
+CREATE PROCEDURE is_armstrong(IN num INT)
+BEGIN
+    SET @sum = 0, @temp = num;
+    WHILE @temp > 0 DO
+        SET @digit = @temp MOD 10, @sum = @sum + (@digit * @digit * @digit), @temp = @temp DIV 10;
+    END WHILE;
+    INSERT INTO results (description, value) VALUES ('Armstrong', IF(@sum = num, 1, 0));
+END //
+
+-- 8) Arithmetic Operations
+CREATE PROCEDURE calculate(IN a FLOAT, IN b FLOAT, IN operation CHAR(1))
+BEGIN
+    CASE operation
+        WHEN '+' THEN SET @result = a + b;
+        WHEN '-' THEN SET @result = a - b;
+        WHEN '*' THEN SET @result = a * b;
+        WHEN '/' THEN SET @result = a / b;
+        ELSE SET @result = NULL;
+    END CASE;
+    INSERT INTO results (description, value) VALUES ('Calculation Result', @result);
+END //
+
+DELIMITER ;
+
+-- Queries to call each procedure and display results
+CALL convert_celsius_to_fahrenheit(25);
+SELECT * FROM results WHERE description = 'Fahrenheit';
+
+-- Swap Values
+SET @a = 5, @b = 10;
+CALL swap_values(@a, @b);
+SELECT @a AS 'Swapped Value 1', @b AS 'Swapped Value 2';
+
+-- Greatest Among Three Numbers
+CALL greatest_of_three(10, 20, 15);
+SELECT * FROM results WHERE description = 'Greatest';
+
+-- Factorial of a Given Number
+CALL factorial(5);
+SELECT * FROM results WHERE description = 'Factorial';
+
+-- Generate N Even Numbers
+CALL generate_even_numbers(5);
+SELECT * FROM results WHERE description = 'Even Number';
+
+-- Fibonacci Series
+CALL fibonacci_series(10);
+SELECT * FROM results WHERE description = 'Fibonacci Number';
+
+-- Check if Armstrong Number
+CALL is_armstrong(153);
+SELECT * FROM results WHERE description = 'Armstrong';
+
+-- Arithmetic Operations Using Case
+CALL calculate(10, 5, '+');
+SELECT * FROM results WHERE description = 'Calculation Result';
