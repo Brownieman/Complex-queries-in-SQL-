@@ -1,0 +1,112 @@
+#creating a database called book3.
+
+create database book3;
+use book3;
+
+#creating a table for BOOKS.
+
+create table BOOKS (book_id INT primary key , title VARCHAR(50), author VARCHAR(50), price DECIMAL,
+category VARCHAR(50), stock_quantity INT);
+
+#creating a table for CUSTOMERS.
+
+create table CUSTOMERS (customer_id INT primary key, name VARCHAR(50), email VARCHAR(50),
+phone VARCHAR(50));
+
+#creating a table for ORDERS.
+
+CREATE TABLE ORDERS (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES CUSTOMERS(customer_id)
+);
+
+#creating a table for ORDERDETAILS
+
+CREATE TABLE ORDERDETAILS (
+    order_id INT,
+    book_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES ORDERS(order_id),
+    FOREIGN KEY (book_id) REFERENCES BOOKS(book_id)
+);
+
+#inserting the values for the BOOKS table.
+
+INSERT INTO BOOKS (book_id, title, author, price, category, stock_quantity) VALUES
+(1, 'Maus', 'Art Spiegelman', 650, 'Fiction', 12),
+(2, 'The Story of My Life', 'Helen Keller', 450, 'Life Story', 7),
+(3, 'Red Mars', 'Kim Stanley Robinson', 760, 'SciFi', 40),
+(4, 'The War of the Worlds', 'H. G. Wells', 300, 'SciFi', 20),
+(5, 'Neuromancer', 'William Gibson', 1299, 'SciFi', 30);
+
+#selecting the Books table to display what is presented in the table.
+
+SELECT * FROM BOOKS;
+
+#inserting the values for the CUSTOMERS table.
+
+INSERT INTO CUSTOMERS (customer_id,name,email,phone) VALUES
+(1, 'Alen', 'alen12@gmail.com', '8769584736'),
+(2, 'Belly', 'belly21@gmail.com', '6958743625'),
+(3, 'Peter', 'peter34@gmail.com', '7968574635'),
+(4, 'Gunther', 'gunther44@gmail.com', '8097683524'),
+(5, 'Shaggy', 'shaggy32@gmail.com', '9182374655');
+
+#inserting the values for the ORDERS table.
+
+INSERT INTO ORDERS (order_id, customer_id, order_date) VALUES
+(1, 1, '2024-09-01'),
+(2, 2, '2024-09-08'),
+(3, 3, '2024-09-13'),
+(4, 4, '2024-09-05');
+
+#inserting the values for the ORDERDETAILS table.
+
+INSERT INTO ORDERDETAILS (order_id, book_id, quantity) VALUES
+(1, 1, 4),  
+(2, 2, 2),  
+(3, 3, 6), 
+(4, 4, 3);
+
+# Total Revenue from All Book Sales.
+
+SELECT SUM(b.price * od.quantity) AS total_revenue
+FROM BOOKS b
+JOIN ORDERDETAILS od ON b.book_id = od.book_id;
+
+# Customers Who Have Bought More Than One Book in a Single Order.
+
+select c.customer_id, c.name
+from customers c
+join orders o on c.customer_id = o.customer_id
+join orderdetails od on o.order_id = od.order_id
+group by c.customer_id , c.name, o.order_id
+having sum(od.quantity)>1;
+
+# Customer Who Has Spent the Most Money.
+
+SELECT c.customer_id, c.name, SUM(b.price * od.quantity) AS total_spent
+FROM CUSTOMERS c
+JOIN ORDERS o ON c.customer_id = o.customer_id
+JOIN ORDERDETAILS od ON o.order_id = od.order_id
+JOIN BOOKS b ON od.book_id = b.book_id
+GROUP BY c.customer_id
+ORDER BY total_spent DESC
+LIMIT 1;
+
+# Total Number of Distinct Customers Who Have Placed Orders.
+
+SELECT COUNT(DISTINCT customer_id) AS distinct_customers
+FROM ORDERS;
+
+# Display Orders with a Book in the "SciFi" Category.
+
+SELECT o.order_id, o.order_date, c.name, b.title
+FROM ORDERS o
+JOIN ORDERDETAILS od ON o.order_id = od.order_id
+JOIN BOOKS b ON od.book_id = b.book_id
+JOIN CUSTOMERS c ON o.customer_id = c.customer_id
+WHERE b.category = 'SciFi';
+
